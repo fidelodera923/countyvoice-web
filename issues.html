@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Track Issues – CountyVoice</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-teal-700 text-white shadow-lg">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="index.html" class="font-bold text-xl"><i class="fas fa-comments mr-2"></i>CountyVoice</a>
+      <div class="hidden md:flex gap-5 text-sm">
+        <a href="index.html" class="hover:text-teal-200">Home</a>
+        <a href="submit.html" class="hover:text-teal-200">Submit Issue</a>
+        <a href="issues.html" class="font-bold underline">Track Issues</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-bold mb-2">Track Issues</h1>
+    <p class="text-gray-600 mb-6">Browse public submissions or search by reference</p>
+
+    <div class="flex flex-wrap gap-2 mb-6">
+      <input id="search" class="border rounded-lg px-3 py-2 flex-1 min-w-[200px]" placeholder="e.g. CV-2026-1234" title="Search reference" />
+      <select id="filter-status" class="border rounded-lg px-3 py-2" title="Filter status" aria-label="Filter by status">
+        <option value="">All statuses</option>
+        <option>Received</option>
+        <option>Under Review</option>
+        <option>Acknowledged</option>
+        <option>Funded</option>
+        <option>Ongoing</option>
+        <option>Rejected</option>
+      </select>
+      <button onclick="render()" class="bg-teal-700 text-white px-4 py-2 rounded-lg">Filter</button>
+    </div>
+
+    <div id="list" class="space-y-4"></div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let all = [];
+    function badge(s) {
+      const m = {
+        'Received': 'bg-blue-100 text-blue-800',
+        'Under Review': 'bg-yellow-100 text-yellow-800',
+        'Acknowledged': 'bg-purple-100 text-purple-800',
+        'Funded': 'bg-green-100 text-green-800',
+        'Ongoing': 'bg-indigo-100 text-indigo-800',
+        'Rejected': 'bg-red-100 text-red-800'
+      };
+      return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${m[s]||'bg-gray-100'}">${s}</span>`;
+    }
+    function render() {
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      const st = document.getElementById('filter-status').value;
+      let items = all;
+      if (q) items = items.filter(i => (i.ref || '').toLowerCase().includes(q) || (i.title || '').toLowerCase().includes(q));
+      if (st) items = items.filter(i => i.status === st);
+      const box = document.getElementById('list');
+      if (!items.length) {
+        box.innerHTML = '<p class="text-gray-500 text-center py-10">No issues found.</p>';
+        return;
+      }
+      box.innerHTML = items.map(i => `
+        <div class="bg-white border rounded-xl p-5 shadow-sm">
+          <div class="flex justify-between gap-2 mb-2">
+            <span class="font-mono text-sm text-teal-700 font-semibold">${CountyVoice.escapeHtml(i.ref || i._id)}</span>
+            ${badge(i.status)}
+          </div>
+          <h3 class="font-semibold">${CountyVoice.escapeHtml(i.title)}</h3>
+          <p class="text-sm text-gray-600 mt-1">${CountyVoice.escapeHtml(i.description)}</p>
+          <p class="text-xs text-gray-500 mt-2">${CountyVoice.escapeHtml(i.ward)} · ${CountyVoice.escapeHtml(i.category)} · ${CountyVoice.formatDate(i.createdAt)}</p>
+          ${i.adminNotes ? `<p class="text-sm mt-2 bg-gray-50 rounded p-2"><strong>Official note:</strong> ${CountyVoice.escapeHtml(i.adminNotes)}</p>` : ''}
+        </div>
+      `).join('');
+    }
+    CountyVoice.getIssues().then(data => { all = data; render(); })
+      .catch(e => { document.getElementById('list').innerHTML = `<p class="text-red-600">${CountyVoice.escapeHtml(e.message)}</p>`; });
+  </script>
+</body>
+</html>

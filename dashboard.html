@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – CountyVoice</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-teal-700 text-white shadow-lg">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="index.html" class="font-bold text-xl"><i class="fas fa-comments mr-2"></i>CountyVoice</a>
+      <a href="index.html" class="text-sm hover:text-teal-200">Home</a>
+    </div>
+  </nav>
+  <main class="max-w-6xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-bold mb-6">Public Dashboard</h1>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl border p-6 text-center shadow-sm">
+        <p id="t" class="text-3xl font-bold text-teal-700">—</p>
+        <p class="text-sm text-gray-600 mt-1">Total Issues</p>
+      </div>
+      <div class="bg-white rounded-xl border p-6 text-center shadow-sm">
+        <p id="r" class="text-3xl font-bold text-blue-600">—</p>
+        <p class="text-sm text-gray-600 mt-1">Received</p>
+      </div>
+      <div class="bg-white rounded-xl border p-6 text-center shadow-sm">
+        <p id="f" class="text-3xl font-bold text-green-600">—</p>
+        <p class="text-sm text-gray-600 mt-1">Funded / Ongoing</p>
+      </div>
+      <div class="bg-white rounded-xl border p-6 text-center shadow-sm">
+        <p id="w" class="text-3xl font-bold text-purple-600">—</p>
+        <p class="text-sm text-gray-600 mt-1">Wards</p>
+      </div>
+    </div>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    CountyVoice.getStats().then(s => {
+      document.getElementById('t').textContent = s.total;
+      document.getElementById('r').textContent = s.received;
+      document.getElementById('f').textContent = s.funded;
+      document.getElementById('w').textContent = s.wards;
+    }).catch(() => {});
+  </script>
+</body>
+</html>

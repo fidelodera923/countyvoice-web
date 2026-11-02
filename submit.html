@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Issue – CountyVoice</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-teal-700 text-white shadow-lg">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="index.html" class="font-bold text-xl"><i class="fas fa-comments mr-2"></i>CountyVoice</a>
+      <div class="hidden md:flex gap-5 text-sm">
+        <a href="index.html" class="hover:text-teal-200">Home</a>
+        <a href="submit.html" class="font-bold underline">Submit Issue</a>
+        <a href="issues.html" class="hover:text-teal-200">Track Issues</a>
+        <a href="user.html" class="hover:text-teal-200">My Account</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Submit an Issue</h1>
+    <p class="text-gray-600 mb-4">Describe a local problem in your ward</p>
+
+    <div id="user-banner" class="hidden bg-teal-50 border border-teal-200 text-teal-900 rounded-lg px-4 py-3 mb-4 text-sm"></div>
+
+    <form id="form" class="bg-white rounded-xl shadow-md p-6 space-y-4">
+      <div>
+        <label for="name" class="block text-sm font-medium mb-1">Your Name</label>
+        <input id="name" class="w-full border rounded-lg px-3 py-2" placeholder="Full name" title="Name" />
+      </div>
+      <div>
+        <label for="phone" class="block text-sm font-medium mb-1">Phone (optional)</label>
+        <input id="phone" class="w-full border rounded-lg px-3 py-2" placeholder="07XXXXXXXX" title="Phone" />
+      </div>
+      <div>
+        <label for="ward" class="block text-sm font-medium mb-1">Ward *</label>
+        <select id="ward" class="w-full border rounded-lg px-3 py-2" required title="Ward" aria-label="Select ward">
+          <option value="">Select ward</option>
+        </select>
+      </div>
+      <div>
+        <label for="category" class="block text-sm font-medium mb-1">Category *</label>
+        <select id="category" class="w-full border rounded-lg px-3 py-2" required title="Category" aria-label="Select category">
+          <option value="">Select category</option>
+        </select>
+      </div>
+      <div>
+        <label for="title" class="block text-sm font-medium mb-1">Title * (min 10 characters)</label>
+        <input id="title" class="w-full border rounded-lg px-3 py-2" required minlength="10" maxlength="120" placeholder="Short title of the problem" title="Title" />
+      </div>
+      <div>
+        <label for="description" class="block text-sm font-medium mb-1">Description * (min 30 characters)</label>
+        <textarea id="description" rows="4" class="w-full border rounded-lg px-3 py-2" required minlength="30" placeholder="Explain the issue clearly..." title="Description"></textarea>
+      </div>
+      <button type="submit" class="w-full bg-teal-700 text-white font-semibold py-2.5 rounded-lg hover:bg-teal-800">
+        Submit Issue
+      </button>
+      <p id="form-error" class="text-red-600 text-sm hidden"></p>
+    </form>
+
+    <div id="success" class="hidden bg-white rounded-xl shadow-md p-8 text-center">
+      <div class="text-green-600 text-4xl mb-3"><i class="fas fa-check-circle"></i></div>
+      <h2 class="text-xl font-bold mb-2">Issue submitted</h2>
+      <p class="text-gray-600 mb-2">Your reference number is:</p>
+      <p id="ref-no" class="font-mono text-teal-700 text-lg font-bold mb-4"></p>
+      <a href="issues.html" class="text-teal-700 underline">Track issues</a>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let currentUser = null;
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem('countyvoice_user') || 'null');
+    } catch (e) {}
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (currentUser) {
+        const b = document.getElementById('user-banner');
+        b.textContent = 'Logged in as ' + (currentUser.fullName || currentUser.username) + ' — name and ward will be filled for you.';
+        b.classList.remove('hidden');
+        document.getElementById('name').value = currentUser.fullName || currentUser.username || '';
+      }
+      try {
+        const [wards, cats] = await Promise.all([CountyVoice.getWards(), CountyVoice.getCategories()]);
+        const wSel = document.getElementById('ward');
+        const cSel = document.getElementById('category');
+        wards.forEach(w => {
+          const o = document.createElement('option');
+          o.value = w; o.textContent = w;
+          if (currentUser && currentUser.location === w) o.selected = true;
+          wSel.appendChild(o);
+        });
+        cats.forEach(c => {
+          const o = document.createElement('option');
+          o.value = c; o.textContent = c;
+          cSel.appendChild(o);
+        });
+      } catch (e) {
+        document.getElementById('form-error').textContent = 'Could not load form options. Check API connection.';
+        document.getElementById('form-error').classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('form').onsubmit = async (ev) => {
+      ev.preventDefault();
+      const err = document.getElementById('form-error');
+      err.classList.add('hidden');
+      try {
+        const issue = await CountyVoice.saveIssue({
+          name: document.getElementById('name').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          ward: document.getElementById('ward').value,
+          category: document.getElementById('category').value,
+          title: document.getElementById('title').value.trim(),
+          description: document.getElementById('description').value.trim(),
+          userId: currentUser ? currentUser.id : null
+        });
+        document.getElementById('form').classList.add('hidden');
+        document.getElementById('success').classList.remove('hidden');
+        document.getElementById('ref-no').textContent = issue.ref || issue._id;
+      } catch (e) {
+        err.textContent = e.message || 'Submission failed';
+        err.classList.remove('hidden');
+      }
+    };
+  </script>
+</body>
+</html>

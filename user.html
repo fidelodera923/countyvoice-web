@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Account – CountyVoice</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-teal-700 text-white shadow-lg">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="index.html" class="font-bold text-xl"><i class="fas fa-comments mr-2"></i>CountyVoice</a>
+      <div class="hidden md:flex gap-5 text-sm">
+        <a href="index.html" class="hover:text-teal-200">Home</a>
+        <a href="submit.html" class="hover:text-teal-200">Submit Issue</a>
+        <a href="my-issues.html" class="hover:text-teal-200">My Issues</a>
+        <a href="user.html" class="font-bold underline">My Account</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-md mx-auto px-4 py-10">
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Citizen Account</h1>
+    <p class="text-gray-600 mb-6">Register or log in to submit and track your issues</p>
+
+    <div id="logged-box" class="hidden bg-white rounded-xl shadow-md p-6 mb-6">
+      <p class="text-sm text-gray-500">Logged in as</p>
+      <p id="who" class="font-semibold text-lg mb-1"></p>
+      <p id="where" class="text-sm text-gray-600 mb-4"></p>
+      <div class="flex flex-wrap gap-2">
+        <a href="submit.html" class="bg-teal-700 text-white px-4 py-2 rounded-lg text-sm">Submit Issue</a>
+        <a href="my-issues.html" class="bg-teal-100 text-teal-800 px-4 py-2 rounded-lg text-sm">My Issues</a>
+        <button onclick="logout()" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm">Logout</button>
+      </div>
+    </div>
+
+    <div id="auth-box">
+      <div class="flex mb-4 rounded-lg overflow-hidden shadow-sm">
+        <button id="tab-login" onclick="showLogin()" class="flex-1 py-3 bg-teal-700 text-white font-medium">Login</button>
+        <button id="tab-register" onclick="showRegister()" class="flex-1 py-3 bg-gray-100 text-gray-600 font-medium">Create Account</button>
+      </div>
+
+      <div id="login-form" class="bg-white rounded-xl shadow-md p-6">
+        <label for="login-user" class="block text-sm font-medium mb-1">Username</label>
+        <input id="login-user" class="w-full border rounded-lg px-3 py-2 mb-3" placeholder="Enter username" title="Username" />
+        <label for="login-pass" class="block text-sm font-medium mb-1">Password</label>
+        <input id="login-pass" type="password" class="w-full border rounded-lg px-3 py-2 mb-4" placeholder="Enter password" title="Password" />
+        <button onclick="doLogin()" class="w-full bg-teal-700 text-white py-2.5 rounded-lg font-semibold hover:bg-teal-800">Login</button>
+        <p id="login-error" class="text-red-600 text-sm mt-3 hidden"></p>
+      </div>
+
+      <div id="register-form" class="bg-white rounded-xl shadow-md p-6 hidden">
+        <label for="reg-name" class="block text-sm font-medium mb-1">Full Name</label>
+        <input id="reg-name" class="w-full border rounded-lg px-3 py-2 mb-3" placeholder="Your full name" title="Full name" />
+        <label for="reg-user" class="block text-sm font-medium mb-1">Username</label>
+        <input id="reg-user" class="w-full border rounded-lg px-3 py-2 mb-3" placeholder="Choose a username" title="Username" />
+        <label for="reg-pass" class="block text-sm font-medium mb-1">Password</label>
+        <input id="reg-pass" type="password" class="w-full border rounded-lg px-3 py-2 mb-3" placeholder="Min 6 characters" title="Password" />
+        <label for="reg-loc" class="block text-sm font-medium mb-1">Location (Ward)</label>
+        <select id="reg-loc" class="w-full border rounded-lg px-3 py-2 mb-4" title="Ward" aria-label="Select ward">
+          <option value="">Select ward</option>
+        </select>
+        <button onclick="doRegister()" class="w-full bg-teal-700 text-white py-2.5 rounded-lg font-semibold hover:bg-teal-800">Create Account</button>
+        <p id="reg-error" class="text-red-600 text-sm mt-3 hidden"></p>
+        <p id="reg-ok" class="text-green-600 text-sm mt-3 hidden"></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    function showLogin() {
+      document.getElementById('login-form').classList.remove('hidden');
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('tab-login').className = 'flex-1 py-3 bg-teal-700 text-white font-medium';
+      document.getElementById('tab-register').className = 'flex-1 py-3 bg-gray-100 text-gray-600 font-medium';
+    }
+    function showRegister() {
+      document.getElementById('register-form').classList.remove('hidden');
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('tab-register').className = 'flex-1 py-3 bg-teal-700 text-white font-medium';
+      document.getElementById('tab-login').className = 'flex-1 py-3 bg-gray-100 text-gray-600 font-medium';
+    }
+
+    function logout() {
+      sessionStorage.removeItem('countyvoice_user');
+      document.getElementById('logged-box').classList.add('hidden');
+      document.getElementById('auth-box').classList.remove('hidden');
+    }
+
+    function showLogged(user) {
+      document.getElementById('auth-box').classList.add('hidden');
+      document.getElementById('logged-box').classList.remove('hidden');
+      document.getElementById('who').textContent = user.fullName || user.username;
+      document.getElementById('where').textContent = 'Ward: ' + (user.location || '—');
+    }
+
+    async function doLogin() {
+      const err = document.getElementById('login-error');
+      err.classList.add('hidden');
+      try {
+        const data = await CountyVoice.loginUser({
+          username: document.getElementById('login-user').value.trim(),
+          password: document.getElementById('login-pass').value
+        });
+        sessionStorage.setItem('countyvoice_user', JSON.stringify(data.user));
+        showLogged(data.user);
+      } catch (e) {
+        err.textContent = e.message || 'Invalid username or password';
+        err.classList.remove('hidden');
+      }
+    }
+
+    async function doRegister() {
+      const err = document.getElementById('reg-error');
+      const ok = document.getElementById('reg-ok');
+      err.classList.add('hidden');
+      ok.classList.add('hidden');
+      try {
+        await CountyVoice.registerUser({
+          fullName: document.getElementById('reg-name').value.trim(),
+          username: document.getElementById('reg-user').value.trim(),
+          password: document.getElementById('reg-pass').value,
+          location: document.getElementById('reg-loc').value
+        });
+        ok.textContent = 'Account created. You can log in now.';
+        ok.classList.remove('hidden');
+        setTimeout(() => {
+          showLogin();
+          document.getElementById('login-user').value = document.getElementById('reg-user').value.trim();
+        }, 1000);
+      } catch (e) {
+        err.textContent = e.message || 'Registration failed';
+        err.classList.remove('hidden');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const wards = await CountyVoice.getWards();
+        const sel = document.getElementById('reg-loc');
+        wards.forEach(w => {
+          const o = document.createElement('option');
+          o.value = w; o.textContent = w;
+          sel.appendChild(o);
+        });
+      } catch (e) {}
+      const saved = sessionStorage.getItem('countyvoice_user');
+      if (saved) {
+        try { showLogged(JSON.parse(saved)); } catch (e) {}
+      }
+    });
+  </script>
+</body>
+</html>
