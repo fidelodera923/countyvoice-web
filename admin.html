@@ -56,7 +56,10 @@
           <input id="p-budget" class="border rounded-lg px-3 py-2" placeholder="Budget" title="Budget" />
           <input id="p-year" class="border rounded-lg px-3 py-2" placeholder="Year" title="Year" />
           <select id="p-status" class="border rounded-lg px-3 py-2" title="Status" aria-label="Status">
-            <option>Not Started</option><option>Ongoing</option><option>Delayed</option><option>Completed</option>
+            <option>Not Started</option>
+            <option>Ongoing</option>
+            <option>Delayed</option>
+            <option>Completed</option>
           </select>
           <input id="p-progress" type="number" min="0" max="100" value="0" class="border rounded-lg px-3 py-2" title="Progress" placeholder="Progress %" />
         </div>
@@ -135,6 +138,7 @@
             </div>
             <h3 class="font-semibold mb-1">${escapeHtml(issue.title)}</h3>
             <p class="text-sm text-gray-600 mb-2">${escapeHtml(issue.description)}</p>
+            ${issue.photo ? `<img src="${issue.photo}" alt="Issue photo" class="mb-3 max-h-48 rounded-lg border object-cover" />` : ''}
             <p class="text-xs text-gray-500 mb-3">${escapeHtml(issue.ward)} · ${escapeHtml(issue.category)} · ${formatDate(issue.createdAt)}</p>
             <label class="text-xs font-medium text-gray-600">Status</label>
             <select id="st-${issue._id}" class="border rounded-lg px-2 py-1 text-sm block mb-2" title="Status" aria-label="Status">

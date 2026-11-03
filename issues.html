@@ -53,7 +53,7 @@
         'Ongoing': 'bg-indigo-100 text-indigo-800',
         'Rejected': 'bg-red-100 text-red-800'
       };
-      return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${m[s]||'bg-gray-100'}">${s}</span>`;
+      return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${m[s] || 'bg-gray-100'}">${s}</span>`;
     }
     function render() {
       const q = document.getElementById('search').value.trim().toLowerCase();
@@ -74,6 +74,7 @@
           </div>
           <h3 class="font-semibold">${CountyVoice.escapeHtml(i.title)}</h3>
           <p class="text-sm text-gray-600 mt-1">${CountyVoice.escapeHtml(i.description)}</p>
+          ${i.photo ? `<img src="${i.photo}" alt="Issue photo" class="mt-3 max-h-48 rounded-lg border object-cover" />` : ''}
           <p class="text-xs text-gray-500 mt-2">${CountyVoice.escapeHtml(i.ward)} · ${CountyVoice.escapeHtml(i.category)} · ${CountyVoice.formatDate(i.createdAt)}</p>
           ${i.adminNotes ? `<p class="text-sm mt-2 bg-gray-50 rounded p-2"><strong>Official note:</strong> ${CountyVoice.escapeHtml(i.adminNotes)}</p>` : ''}
         </div>

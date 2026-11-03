@@ -55,6 +55,12 @@
         <label for="description" class="block text-sm font-medium mb-1">Description * (min 30 characters)</label>
         <textarea id="description" rows="4" class="w-full border rounded-lg px-3 py-2" required minlength="30" placeholder="Explain the issue clearly..." title="Description"></textarea>
       </div>
+      <div>
+        <label for="photo" class="block text-sm font-medium mb-1">Photo (optional)</label>
+        <input id="photo" type="file" accept="image/*" class="w-full border rounded-lg px-3 py-2" title="Photo" />
+        <p class="text-xs text-gray-500 mt-1">JPG, PNG or WebP. Prefer under 1.5MB.</p>
+        <img id="photo-preview" class="hidden mt-3 max-h-40 rounded-lg border object-cover" alt="Preview" />
+      </div>
       <button type="submit" class="w-full bg-teal-700 text-white font-semibold py-2.5 rounded-lg hover:bg-teal-800">
         Submit Issue
       </button>
@@ -78,6 +84,34 @@
       currentUser = JSON.parse(sessionStorage.getItem('countyvoice_user') || 'null');
     } catch (e) {}
 
+    function fileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        if (!file) return resolve(null);
+        if (!file.type.startsWith('image/')) {
+          return reject(new Error('Please choose an image file'));
+        }
+        if (file.size > 1.5 * 1024 * 1024) {
+          return reject(new Error('Photo must be under 1.5MB'));
+        }
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Could not read photo'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    document.getElementById('photo').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      const preview = document.getElementById('photo-preview');
+      if (!file) {
+        preview.classList.add('hidden');
+        preview.src = '';
+        return;
+      }
+      preview.src = URL.createObjectURL(file);
+      preview.classList.remove('hidden');
+    });
+
     document.addEventListener('DOMContentLoaded', async () => {
       if (currentUser) {
         const b = document.getElementById('user-banner');
@@ -91,13 +125,15 @@
         const cSel = document.getElementById('category');
         wards.forEach(w => {
           const o = document.createElement('option');
-          o.value = w; o.textContent = w;
+          o.value = w;
+          o.textContent = w;
           if (currentUser && currentUser.location === w) o.selected = true;
           wSel.appendChild(o);
         });
         cats.forEach(c => {
           const o = document.createElement('option');
-          o.value = c; o.textContent = c;
+          o.value = c;
+          o.textContent = c;
           cSel.appendChild(o);
         });
       } catch (e) {
@@ -111,6 +147,9 @@
       const err = document.getElementById('form-error');
       err.classList.add('hidden');
       try {
+        const photoFile = document.getElementById('photo').files[0];
+        const photo = await fileToDataURL(photoFile);
+
         const issue = await CountyVoice.saveIssue({
           name: document.getElementById('name').value.trim(),
           phone: document.getElementById('phone').value.trim(),
@@ -118,8 +157,10 @@
           category: document.getElementById('category').value,
           title: document.getElementById('title').value.trim(),
           description: document.getElementById('description').value.trim(),
-          userId: currentUser ? currentUser.id : null
+          userId: currentUser ? currentUser.id : null,
+          photo: photo
         });
+
         document.getElementById('form').classList.add('hidden');
         document.getElementById('success').classList.remove('hidden');
         document.getElementById('ref-no').textContent = issue.ref || issue._id;
