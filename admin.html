@@ -11,55 +11,60 @@
   <nav class="bg-teal-700 text-white shadow-lg">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
       <a href="index.html" class="font-bold text-xl"><i class="fas fa-comments mr-2"></i>CountyVoice</a>
-      <div class="hidden md:flex gap-5 text-sm">
-        <a href="index.html" class="hover:text-teal-200">Home</a>
-        <a href="submit.html" class="hover:text-teal-200">Submit Issue</a>
-        <a href="issues.html" class="hover:text-teal-200">Track Issues</a>
-        <a href="admin.html" class="font-bold underline">Admin</a>
-      </div>
+      <a href="index.html" class="text-sm hover:text-teal-200">Home</a>
     </div>
   </nav>
 
   <main class="max-w-5xl mx-auto px-4 py-10">
-    <h1 class="text-2xl font-bold text-gray-800 mb-2">Admin Panel</h1>
-    <p class="text-gray-600 mb-6">County officers only — login with the official admin account</p>
+    <h1 class="text-2xl font-bold mb-2">Admin Panel</h1>
+    <p class="text-gray-600 mb-6">Secure officer access — manage issues, priorities, and promises</p>
 
     <div id="login-box" class="max-w-md mx-auto bg-white rounded-xl shadow-md p-6">
       <h2 class="text-xl font-bold mb-4">Admin Login</h2>
       <label class="block text-sm font-medium mb-1" for="username">Username</label>
-      <input id="username" class="w-full border rounded-lg px-3 py-2 mb-3" placeholder="Admin username" title="Username" />
+      <input id="username" class="w-full border rounded-lg px-3 py-2 mb-3" title="Username" placeholder="Admin username" />
       <label class="block text-sm font-medium mb-1" for="password">Password</label>
-      <input id="password" type="password" class="w-full border rounded-lg px-3 py-2 mb-4" placeholder="Password" title="Password" />
-      <button onclick="doLogin()" class="w-full bg-teal-700 text-white py-2.5 rounded-lg font-semibold hover:bg-teal-800">
-        <i class="fas fa-sign-in-alt mr-2"></i>Login
-      </button>
+      <input id="password" type="password" class="w-full border rounded-lg px-3 py-2 mb-4" title="Password" placeholder="Password" />
+      <button onclick="doLogin()" class="w-full bg-teal-700 text-white py-2.5 rounded-lg font-semibold">Login</button>
       <p id="login-error" class="text-red-600 text-sm mt-3 hidden"></p>
     </div>
 
     <div id="admin-panel" class="hidden">
-      <div class="flex flex-wrap justify-between gap-3 bg-white p-4 rounded-xl shadow-sm mb-6">
+      <div class="flex flex-wrap justify-between gap-3 bg-white p-4 rounded-xl shadow-sm mb-4">
         <div>
           <p class="text-sm text-gray-500">Logged in as</p>
           <p id="admin-name" class="font-semibold"></p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <button onclick="showPromiseForm()" class="bg-teal-100 text-teal-800 px-3 py-1.5 rounded-lg text-sm">+ Add Promise</button>
+          <button onclick="exportCsv()" class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-lg text-sm">Export CSV</button>
           <button onclick="logout()" class="bg-gray-800 text-white px-3 py-1.5 rounded-lg text-sm">Logout</button>
         </div>
       </div>
 
+      <div class="bg-white border rounded-xl p-4 mb-4 grid md:grid-cols-5 gap-2">
+        <input id="f-q" class="border rounded-lg px-3 py-2 text-sm md:col-span-2" placeholder="Search title or ref" title="Search" />
+        <select id="f-status" class="border rounded-lg px-3 py-2 text-sm" title="Status" aria-label="Status">
+          <option value="">All statuses</option>
+          <option>Received</option><option>Under Review</option><option>Acknowledged</option>
+          <option>Funded</option><option>Ongoing</option><option>Rejected</option>
+        </select>
+        <select id="f-priority" class="border rounded-lg px-3 py-2 text-sm" title="Priority" aria-label="Priority">
+          <option value="">All priorities</option>
+          <option>Low</option><option>Medium</option><option>High</option>
+        </select>
+        <button onclick="loadIssues()" class="bg-teal-700 text-white rounded-lg text-sm px-3 py-2">Apply filters</button>
+      </div>
+
       <div id="promise-form" class="hidden bg-white border border-teal-200 rounded-xl p-5 mb-6">
-        <h3 class="font-bold mb-3">Add New Promise / Project</h3>
+        <h3 class="font-bold mb-3">Add Promise</h3>
         <div class="grid md:grid-cols-2 gap-3">
-          <input id="p-title" class="border rounded-lg px-3 py-2" placeholder="Project title *" title="Title" />
+          <input id="p-title" class="border rounded-lg px-3 py-2" placeholder="Title *" title="Title" />
           <input id="p-sector" class="border rounded-lg px-3 py-2" placeholder="Sector *" title="Sector" />
           <input id="p-budget" class="border rounded-lg px-3 py-2" placeholder="Budget" title="Budget" />
           <input id="p-year" class="border rounded-lg px-3 py-2" placeholder="Year" title="Year" />
           <select id="p-status" class="border rounded-lg px-3 py-2" title="Status" aria-label="Status">
-            <option>Not Started</option>
-            <option>Ongoing</option>
-            <option>Delayed</option>
-            <option>Completed</option>
+            <option>Not Started</option><option>Ongoing</option><option>Delayed</option><option>Completed</option>
           </select>
           <input id="p-progress" type="number" min="0" max="100" value="0" class="border rounded-lg px-3 py-2" title="Progress" placeholder="Progress %" />
         </div>
@@ -68,26 +73,24 @@
           <button onclick="savePromise()" class="bg-teal-700 text-white px-4 py-2 rounded-lg">Save</button>
           <button onclick="hidePromiseForm()" class="bg-gray-200 px-4 py-2 rounded-lg">Cancel</button>
         </div>
-        <p id="promise-msg" class="text-sm mt-2 hidden"></p>
       </div>
 
-      <h2 class="text-xl font-semibold mb-4">Citizen Submissions</h2>
       <div id="issues-list" class="space-y-4"></div>
     </div>
   </main>
 
-  <script src="js/config.js"></script>
   <script src="js/app.js"></script>
   <script>
-    const { loginAdmin, getIssues, updateIssue, addPromise, escapeHtml, formatDate } = window.CountyVoice;
+    const CV = window.CountyVoice;
 
     function doLogin() {
       const err = document.getElementById('login-error');
       err.classList.add('hidden');
-      loginAdmin({
+      CV.loginAdmin({
         username: document.getElementById('username').value.trim(),
         password: document.getElementById('password').value
       }).then(data => {
+        sessionStorage.setItem('countyvoice_admin_token', data.token);
         sessionStorage.setItem('countyvoice_admin', JSON.stringify(data.admin));
         showPanel(data.admin);
       }).catch(e => {
@@ -97,6 +100,7 @@
     }
 
     function logout() {
+      sessionStorage.removeItem('countyvoice_admin_token');
       sessionStorage.removeItem('countyvoice_admin');
       document.getElementById('admin-panel').classList.add('hidden');
       document.getElementById('login-box').classList.remove('hidden');
@@ -109,62 +113,100 @@
       loadIssues();
     }
 
-    function badge(status) {
-      const map = {
-        'Received': 'bg-blue-100 text-blue-800',
-        'Under Review': 'bg-yellow-100 text-yellow-800',
-        'Acknowledged': 'bg-purple-100 text-purple-800',
-        'Funded': 'bg-green-100 text-green-800',
-        'Ongoing': 'bg-indigo-100 text-indigo-800',
-        'Rejected': 'bg-red-100 text-red-800'
-      };
-      return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${map[status] || 'bg-gray-100'}">${status}</span>`;
+    function filterParams() {
+      const params = {};
+      const q = document.getElementById('f-q').value.trim();
+      const status = document.getElementById('f-status').value;
+      const priority = document.getElementById('f-priority').value;
+      if (q) params.q = q;
+      if (status) params.status = status;
+      if (priority) params.priority = priority;
+      return params;
     }
 
     async function loadIssues() {
       const list = document.getElementById('issues-list');
       list.innerHTML = '<p class="text-gray-500">Loading...</p>';
       try {
-        const issues = await getIssues();
+        const issues = await CV.getAdminIssues(filterParams());
         if (!issues.length) {
-          list.innerHTML = '<p class="text-gray-500 text-center py-8">No issues submitted yet.</p>';
+          list.innerHTML = '<p class="text-gray-500 text-center py-8">No issues found.</p>';
           return;
         }
         list.innerHTML = issues.map(issue => `
           <div class="bg-white rounded-xl border p-5 shadow-sm">
-            <div class="flex justify-between gap-2 mb-2">
-              <span class="font-mono text-sm text-teal-700 font-semibold">${escapeHtml(issue.ref || issue._id)}</span>
-              ${badge(issue.status)}
+            <div class="flex flex-wrap justify-between gap-2 mb-2">
+              <span class="font-mono text-sm text-teal-700 font-semibold">${CV.escapeHtml(issue.ref || issue._id)}</span>
+              <span class="text-xs bg-gray-100 px-2 py-0.5 rounded-full">${CV.escapeHtml(issue.status)}</span>
             </div>
-            <h3 class="font-semibold mb-1">${escapeHtml(issue.title)}</h3>
-            <p class="text-sm text-gray-600 mb-2">${escapeHtml(issue.description)}</p>
-            ${issue.photo ? `<img src="${issue.photo}" alt="Issue photo" class="mb-3 max-h-48 rounded-lg border object-cover" />` : ''}
-            <p class="text-xs text-gray-500 mb-3">${escapeHtml(issue.ward)} · ${escapeHtml(issue.category)} · ${formatDate(issue.createdAt)}</p>
-            <label class="text-xs font-medium text-gray-600">Status</label>
-            <select id="st-${issue._id}" class="border rounded-lg px-2 py-1 text-sm block mb-2" title="Status" aria-label="Status">
-              ${['Received','Under Review','Acknowledged','Funded','Ongoing','Rejected'].map(s =>
-                `<option value="${s}" ${issue.status===s?'selected':''}>${s}</option>`).join('')}
-            </select>
-            <label class="text-xs font-medium text-gray-600">Official note</label>
-            <textarea id="nt-${issue._id}" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm mb-2" title="Notes" placeholder="Add note">${escapeHtml(issue.adminNotes || '')}</textarea>
-            <button onclick="saveIssue('${issue._id}')" class="bg-teal-700 text-white text-sm px-4 py-2 rounded-lg">Save Changes</button>
+            <h3 class="font-semibold">${CV.escapeHtml(issue.title)}</h3>
+            <p class="text-sm text-gray-600 mt-1">${CV.escapeHtml(issue.description)}</p>
+            ${issue.photo ? `<img src="${issue.photo}" alt="Issue photo" class="mt-3 max-h-40 rounded-lg border object-cover" />` : ''}
+            <p class="text-xs text-gray-500 mt-2">${CV.escapeHtml(issue.ward)} · ${CV.escapeHtml(issue.category)} · ${CV.formatDate(issue.createdAt)}</p>
+
+            <div class="grid md:grid-cols-2 gap-3 mt-3">
+              <div>
+                <label class="text-xs font-medium">Status</label>
+                <select id="st-${issue._id}" class="w-full border rounded-lg px-2 py-1 text-sm" title="Status" aria-label="Status">
+                  ${['Received','Under Review','Acknowledged','Funded','Ongoing','Rejected'].map(s =>
+                    `<option ${issue.status===s?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label class="text-xs font-medium">Priority</label>
+                <select id="pr-${issue._id}" class="w-full border rounded-lg px-2 py-1 text-sm" title="Priority" aria-label="Priority">
+                  ${['Low','Medium','High'].map(s =>
+                    `<option ${issue.priority===s?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label class="text-xs font-medium">Department</label>
+                <input id="dp-${issue._id}" class="w-full border rounded-lg px-2 py-1 text-sm" title="Department" value="${CV.escapeHtml(issue.department || 'General')}" />
+              </div>
+            </div>
+
+            <label class="text-xs font-medium mt-3 block">Official response (public)</label>
+            <textarea id="nt-${issue._id}" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm" title="Official response">${CV.escapeHtml(issue.adminNotes || '')}</textarea>
+
+            <label class="text-xs font-medium mt-2 block">Internal note (admin only)</label>
+            <textarea id="in-${issue._id}" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm" title="Internal note">${CV.escapeHtml(issue.internalNotes || '')}</textarea>
+
+            <button onclick="saveIssue('${issue._id}')" class="mt-3 bg-teal-700 text-white text-sm px-4 py-2 rounded-lg">Save changes</button>
           </div>
         `).join('');
       } catch (e) {
-        list.innerHTML = `<p class="text-red-600">${escapeHtml(e.message)}</p>`;
+        list.innerHTML = `<p class="text-red-600">${CV.escapeHtml(e.message)}</p>`;
       }
     }
 
     async function saveIssue(id) {
       try {
-        await updateIssue(id, {
+        await CV.updateIssue(id, {
           status: document.getElementById('st-' + id).value,
-          adminNotes: document.getElementById('nt-' + id).value.trim()
+          priority: document.getElementById('pr-' + id).value,
+          department: document.getElementById('dp-' + id).value.trim(),
+          adminNotes: document.getElementById('nt-' + id).value.trim(),
+          internalNotes: document.getElementById('in-' + id).value.trim()
         });
-        alert('Issue updated');
+        CV.toast('Issue updated', 'success');
         loadIssues();
       } catch (e) {
-        alert(e.message);
+        CV.toast(e.message, 'error');
+      }
+    }
+
+    async function exportCsv() {
+      try {
+        const blob = await CV.exportAdminIssues(filterParams());
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'countyvoice-issues.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        CV.toast('CSV downloaded', 'success');
+      } catch (e) {
+        CV.toast(e.message, 'error');
       }
     }
 
@@ -172,9 +214,8 @@
     function hidePromiseForm() { document.getElementById('promise-form').classList.add('hidden'); }
 
     async function savePromise() {
-      const msg = document.getElementById('promise-msg');
       try {
-        await addPromise({
+        await CV.addPromise({
           title: document.getElementById('p-title').value.trim(),
           sector: document.getElementById('p-sector').value.trim(),
           budget: document.getElementById('p-budget').value.trim(),
@@ -183,21 +224,18 @@
           progress: parseInt(document.getElementById('p-progress').value, 10) || 0,
           notes: document.getElementById('p-notes').value.trim()
         });
-        msg.textContent = 'Promise added successfully';
-        msg.className = 'text-sm mt-2 text-green-600';
-        msg.classList.remove('hidden');
+        CV.toast('Promise added', 'success');
         hidePromiseForm();
       } catch (e) {
-        msg.textContent = e.message;
-        msg.className = 'text-sm mt-2 text-red-600';
-        msg.classList.remove('hidden');
+        CV.toast(e.message, 'error');
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      const token = sessionStorage.getItem('countyvoice_admin_token');
       const saved = sessionStorage.getItem('countyvoice_admin');
-      if (saved) {
-        try { showPanel(JSON.parse(saved)); } catch (e) { sessionStorage.removeItem('countyvoice_admin'); }
+      if (token && saved) {
+        try { showPanel(JSON.parse(saved)); } catch (e) { logout(); }
       }
     });
   </script>
