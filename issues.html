@@ -20,11 +20,11 @@
   </nav>
 
   <main class="max-w-4xl mx-auto px-4 py-10">
-    <h1 class="text-2xl font-bold mb-2">Track Issues</h1>
-    <p class="text-gray-600 mb-6">Browse public submissions or search by reference</p>
+    <h1 class="text-2xl font-bold mb-2">Track issues</h1>
+    <p class="text-gray-600 mb-6">Follow public reports and official progress across wards</p>
 
     <div class="flex flex-wrap gap-2 mb-6">
-      <input id="search" class="border rounded-lg px-3 py-2 flex-1 min-w-[200px]" placeholder="e.g. CV-2026-1234" title="Search reference" />
+      <input id="search" class="border rounded-lg px-3 py-2 flex-1 min-w-[200px]" placeholder="Search title or reference e.g. CV-2026-1234" title="Search" />
       <select id="filter-status" class="border rounded-lg px-3 py-2" title="Filter status" aria-label="Filter by status">
         <option value="">All statuses</option>
         <option>Received</option>
@@ -37,7 +37,9 @@
       <button onclick="render()" class="bg-teal-700 text-white px-4 py-2 rounded-lg">Filter</button>
     </div>
 
-    <div id="list" class="space-y-4"></div>
+    <div id="list" class="space-y-4">
+      <p class="text-gray-500 text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Loading issues...</p>
+    </div>
   </main>
 
   <script src="js/config.js"></script>
@@ -63,7 +65,11 @@
       if (st) items = items.filter(i => i.status === st);
       const box = document.getElementById('list');
       if (!items.length) {
-        box.innerHTML = '<p class="text-gray-500 text-center py-10">No issues found.</p>';
+        box.innerHTML = `
+          <div class="bg-white border border-dashed rounded-xl p-10 text-center">
+            <p class="text-gray-600 mb-3">No issues match your search.</p>
+            <a href="submit.html" class="inline-block bg-teal-700 text-white px-4 py-2 rounded-lg text-sm">Report an issue</a>
+          </div>`;
         return;
       }
       box.innerHTML = items.map(i => `
@@ -74,14 +80,17 @@
           </div>
           <h3 class="font-semibold">${CountyVoice.escapeHtml(i.title)}</h3>
           <p class="text-sm text-gray-600 mt-1">${CountyVoice.escapeHtml(i.description)}</p>
+          <p class="text-xs text-teal-700 mt-1">${CountyVoice.escapeHtml(CountyVoice.statusMeaning(i.status))}</p>
           ${i.photo ? `<img src="${i.photo}" alt="Issue photo" class="mt-3 max-h-48 rounded-lg border object-cover" />` : ''}
-          <p class="text-xs text-gray-500 mt-2">${CountyVoice.escapeHtml(i.ward)} · ${CountyVoice.escapeHtml(i.category)} · ${CountyVoice.formatDate(i.createdAt)}</p>
-          ${i.adminNotes ? `<p class="text-sm mt-2 bg-gray-50 rounded p-2"><strong>Official note:</strong> ${CountyVoice.escapeHtml(i.adminNotes)}</p>` : ''}
+          <p class="text-xs text-gray-500 mt-2">${CountyVoice.escapeHtml(i.ward)} · ${CountyVoice.escapeHtml(i.category)} · ${CountyVoice.timeAgo(i.createdAt)}</p>
+          ${i.adminNotes ? `<p class="text-sm mt-2 bg-gray-50 rounded p-2"><strong>Official response:</strong> ${CountyVoice.escapeHtml(i.adminNotes)}</p>` : ''}
         </div>
       `).join('');
     }
     CountyVoice.getIssues().then(data => { all = data; render(); })
-      .catch(e => { document.getElementById('list').innerHTML = `<p class="text-red-600">${CountyVoice.escapeHtml(e.message)}</p>`; });
+      .catch(e => {
+        document.getElementById('list').innerHTML = `<p class="text-red-600 text-center">${CountyVoice.escapeHtml(e.message)}</p>`;
+      });
   </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CountyVoice – Public Participation Platform</title>
+  <title>CountyVoice – Your Voice. Your County.</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
@@ -14,12 +14,11 @@
         <a href="index.html" class="flex items-center gap-2 font-bold text-xl">
           <i class="fas fa-comments"></i><span>CountyVoice</span>
         </a>
-        <div class="hidden md:flex gap-5 text-sm font-medium">
+        <div class="hidden md:flex gap-4 text-sm font-medium items-center">
           <a href="index.html" class="hover:text-teal-200 font-bold underline">Home</a>
           <a href="submit.html" class="hover:text-teal-200">Submit Issue</a>
           <a href="issues.html" class="hover:text-teal-200">Track Issues</a>
-          <a href="my-issues.html" class="hover:text-teal-200">My Issues</a>
-          <a href="dashboard.html" class="hover:text-teal-200">Dashboard</a>
+          <a href="my-issues.html" class="hover:text-teal-200 relative">My Issues <span id="nav-dot" class="hidden absolute -top-1 -right-2 w-2 h-2 bg-red-400 rounded-full"></span></a>
           <a href="promises.html" class="hover:text-teal-200">Promises</a>
           <a href="user.html" class="hover:text-teal-200">My Account</a>
           <a href="admin.html" class="hover:text-teal-200">Admin</a>
@@ -31,7 +30,6 @@
         <a href="submit.html" class="block py-1">Submit Issue</a>
         <a href="issues.html" class="block py-1">Track Issues</a>
         <a href="my-issues.html" class="block py-1">My Issues</a>
-        <a href="dashboard.html" class="block py-1">Dashboard</a>
         <a href="promises.html" class="block py-1">Promises</a>
         <a href="user.html" class="block py-1">My Account</a>
         <a href="admin.html" class="block py-1">Admin</a>
@@ -39,66 +37,93 @@
     </div>
   </nav>
 
+  <div id="welcome-bar" class="hidden bg-teal-50 border-b border-teal-100">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+      <p class="text-teal-900"><i class="fas fa-hand-sparkles text-teal-600 mr-1"></i> <span id="welcome-text"></span></p>
+      <div class="flex flex-wrap gap-2">
+        <a href="submit.html" class="bg-teal-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium">Report an issue</a>
+        <a href="my-issues.html" class="bg-white border border-teal-200 text-teal-800 px-3 py-1.5 rounded-lg text-xs font-medium">My Issues</a>
+        <a href="promises.html" class="bg-white border border-teal-200 text-teal-800 px-3 py-1.5 rounded-lg text-xs font-medium">Promises</a>
+      </div>
+    </div>
+  </div>
+
   <main class="flex-1">
-    <section class="bg-teal-800 text-white py-16 px-4">
+    <section class="bg-gradient-to-br from-teal-800 via-teal-700 to-teal-600 text-white py-16 px-4">
       <div class="max-w-4xl mx-auto text-center">
-        <h1 class="text-3xl md:text-4xl font-bold mb-4">Your Voice. Your County. Your Development.</h1>
-        <p class="text-teal-100 text-lg mb-8">
-          Report local issues, track progress, and see how county promises compare with delivery.
+        <p class="text-teal-100 text-sm font-medium mb-2 uppercase tracking-wide">Digital public participation</p>
+        <h1 class="text-3xl md:text-5xl font-bold mb-4 leading-tight">Your Voice. Your County. Your Development.</h1>
+        <p class="text-teal-50 text-lg mb-8 max-w-2xl mx-auto">
+          Tell us what’s wrong on your street, track official responses, and see how county promises compare with delivery.
         </p>
         <div class="flex flex-wrap justify-center gap-3">
-          <a href="submit.html" class="bg-white text-teal-800 font-semibold px-6 py-3 rounded-lg hover:bg-teal-50">Submit an Issue</a>
-          <a href="issues.html" class="border border-white px-6 py-3 rounded-lg hover:bg-teal-700">Track Issues</a>
-          <a href="user.html" class="border border-white px-6 py-3 rounded-lg hover:bg-teal-700">Create Account</a>
+          <a href="submit.html" class="bg-white text-teal-800 font-semibold px-6 py-3 rounded-xl shadow hover:bg-teal-50">
+            <i class="fas fa-pen-to-square mr-2"></i>Report an issue
+          </a>
+          <a href="issues.html" class="border border-white/80 px-6 py-3 rounded-xl hover:bg-white/10">Track progress</a>
+          <a href="user.html" class="border border-white/80 px-6 py-3 rounded-xl hover:bg-white/10">Create account</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow-md border p-5 text-center">
+          <p class="text-3xl font-bold text-teal-700" id="stat-total">0</p>
+          <p class="text-gray-600 text-sm mt-1">Total issues</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md border p-5 text-center">
+          <p class="text-3xl font-bold text-blue-600" id="stat-received">0</p>
+          <p class="text-gray-600 text-sm mt-1">Awaiting review</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md border p-5 text-center">
+          <p class="text-3xl font-bold text-green-600" id="stat-funded">0</p>
+          <p class="text-gray-600 text-sm mt-1">Funded / ongoing</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md border p-5 text-center">
+          <p class="text-3xl font-bold text-purple-600" id="stat-wards">0</p>
+          <p class="text-gray-600 text-sm mt-1">Wards represented</p>
         </div>
       </div>
     </section>
 
     <section class="max-w-6xl mx-auto px-4 py-12">
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" id="stats">
-        <div class="bg-white rounded-xl shadow-sm border p-5 text-center">
-          <p class="text-3xl font-bold text-teal-700" id="stat-total">—</p>
-          <p class="text-gray-600 text-sm mt-1">Total Issues</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border p-5 text-center">
-          <p class="text-3xl font-bold text-blue-600" id="stat-received">—</p>
-          <p class="text-gray-600 text-sm mt-1">Received</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border p-5 text-center">
-          <p class="text-3xl font-bold text-green-600" id="stat-funded">—</p>
-          <p class="text-gray-600 text-sm mt-1">Funded / Ongoing</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border p-5 text-center">
-          <p class="text-3xl font-bold text-purple-600" id="stat-wards">—</p>
-          <p class="text-gray-600 text-sm mt-1">Wards Represented</p>
-        </div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-bolt text-amber-500 mr-2"></i>Recent activity</h2>
+        <a href="issues.html" class="text-sm text-teal-700 font-medium hover:underline">View all</a>
+      </div>
+      <div id="recent-list" class="grid md:grid-cols-3 gap-4">
+        <div class="bg-white border rounded-xl p-5 animate-pulse h-32"></div>
+        <div class="bg-white border rounded-xl p-5 animate-pulse h-32"></div>
+        <div class="bg-white border rounded-xl p-5 animate-pulse h-32"></div>
       </div>
     </section>
 
     <section class="max-w-6xl mx-auto px-4 pb-16">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">How it works</h2>
       <div class="grid md:grid-cols-3 gap-6">
-        <div class="bg-white rounded-xl border p-6 text-center">
+        <div class="bg-white rounded-xl border p-6 text-center shadow-sm">
           <div class="text-teal-700 text-3xl mb-3"><i class="fas fa-pen-to-square"></i></div>
-          <h3 class="font-semibold mb-2">1. Submit</h3>
-          <p class="text-gray-600 text-sm">Report a local issue by ward and category. Get a reference number instantly.</p>
+          <h3 class="font-semibold mb-2">1. Report</h3>
+          <p class="text-gray-600 text-sm">Describe a local problem, add a photo if you can, and get a reference number.</p>
         </div>
-        <div class="bg-white rounded-xl border p-6 text-center">
-          <div class="text-teal-700 text-3xl mb-3"><i class="fas fa-search"></i></div>
+        <div class="bg-white rounded-xl border p-6 text-center shadow-sm">
+          <div class="text-teal-700 text-3xl mb-3"><i class="fas fa-route"></i></div>
           <h3 class="font-semibold mb-2">2. Track</h3>
           <p class="text-gray-600 text-sm">Follow status from Received to Funded or Ongoing, with official notes.</p>
         </div>
-        <div class="bg-white rounded-xl border p-6 text-center">
+        <div class="bg-white rounded-xl border p-6 text-center shadow-sm">
           <div class="text-teal-700 text-3xl mb-3"><i class="fas fa-landmark"></i></div>
           <h3 class="font-semibold mb-2">3. Compare</h3>
-          <p class="text-gray-600 text-sm">View county promises and reported progress on public projects.</p>
+          <p class="text-gray-600 text-sm">See county promises and reported progress on public projects.</p>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="bg-gray-800 text-gray-300 py-6 text-center text-sm">
-    CountyVoice – Digital Public Participation Platform
+  <footer class="bg-gray-900 text-gray-300 py-8 text-center text-sm">
+    <p class="font-medium text-white mb-1">CountyVoice</p>
+    <p>Built for citizen–county feedback and transparent follow-up.</p>
   </footer>
 
   <script src="js/config.js"></script>
@@ -107,12 +132,65 @@
     document.getElementById('menu-btn').onclick = () =>
       document.getElementById('mobile-menu').classList.toggle('hidden');
 
+    const user = CountyVoice.getUser();
+    if (user) {
+      document.getElementById('welcome-bar').classList.remove('hidden');
+      document.getElementById('welcome-text').textContent =
+        `Welcome back, ${user.fullName || user.username}${user.location ? ' · ' + user.location : ''}`;
+    }
+
+    function badge(s) {
+      const m = {
+        'Received': 'bg-blue-100 text-blue-800',
+        'Under Review': 'bg-yellow-100 text-yellow-800',
+        'Acknowledged': 'bg-purple-100 text-purple-800',
+        'Funded': 'bg-green-100 text-green-800',
+        'Ongoing': 'bg-indigo-100 text-indigo-800',
+        'Rejected': 'bg-red-100 text-red-800'
+      };
+      return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${m[s] || 'bg-gray-100'}">${s}</span>`;
+    }
+
     CountyVoice.getStats().then(s => {
-      document.getElementById('stat-total').textContent = s.total;
-      document.getElementById('stat-received').textContent = s.received;
-      document.getElementById('stat-funded').textContent = s.funded;
-      document.getElementById('stat-wards').textContent = s.wards;
+      CountyVoice.animateValue(document.getElementById('stat-total'), s.total || 0);
+      CountyVoice.animateValue(document.getElementById('stat-received'), s.received || 0);
+      CountyVoice.animateValue(document.getElementById('stat-funded'), s.funded || 0);
+      CountyVoice.animateValue(document.getElementById('stat-wards'), s.wards || 0);
     }).catch(() => {});
+
+    CountyVoice.getIssues().then(issues => {
+      const box = document.getElementById('recent-list');
+      const recent = (issues || []).slice(0, 6);
+      if (!recent.length) {
+        box.innerHTML = `
+          <div class="md:col-span-3 bg-white border border-dashed rounded-xl p-8 text-center">
+            <p class="text-gray-600 mb-3">No issues yet — be the first to report something in your ward.</p>
+            <a href="submit.html" class="inline-block bg-teal-700 text-white px-4 py-2 rounded-lg text-sm">Report an issue</a>
+          </div>`;
+        return;
+      }
+      box.innerHTML = recent.map(i => `
+        <div class="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition">
+          <div class="flex justify-between gap-2 mb-2">
+            <span class="font-mono text-xs text-teal-700">${CountyVoice.escapeHtml(i.ref || '')}</span>
+            ${badge(i.status)}
+          </div>
+          <h3 class="font-semibold text-gray-800 line-clamp-2">${CountyVoice.escapeHtml(i.title)}</h3>
+          <p class="text-xs text-gray-500 mt-2">${CountyVoice.escapeHtml(i.ward)} · ${CountyVoice.timeAgo(i.createdAt)}</p>
+          ${i.photo ? '<p class="text-xs text-teal-600 mt-2"><i class="fas fa-camera mr-1"></i>Photo attached</p>' : ''}
+        </div>
+      `).join('');
+
+      if (user && user.id) {
+        const mine = issues.filter(i => String(i.userId) === String(user.id));
+        if (mine.some(i => CountyVoice.isRecentlyUpdated(i))) {
+          document.getElementById('nav-dot').classList.remove('hidden');
+        }
+      }
+    }).catch(() => {
+      document.getElementById('recent-list').innerHTML =
+        '<p class="text-gray-500 md:col-span-3">Could not load recent activity. Check your connection to the API.</p>';
+    });
   </script>
 </body>
 </html>

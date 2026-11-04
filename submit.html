@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Submit Issue – CountyVoice</title>
+  <title>Report an Issue – CountyVoice</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
@@ -21,8 +21,8 @@
   </nav>
 
   <main class="max-w-xl mx-auto px-4 py-10">
-    <h1 class="text-2xl font-bold text-gray-800 mb-2">Submit an Issue</h1>
-    <p class="text-gray-600 mb-4">Describe a local problem in your ward</p>
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Tell us what’s wrong</h1>
+    <p class="text-gray-600 mb-4">Report a local problem in your ward. Add a photo if it helps explain the issue.</p>
 
     <div id="user-banner" class="hidden bg-teal-50 border border-teal-200 text-teal-900 rounded-lg px-4 py-3 mb-4 text-sm"></div>
 
@@ -49,11 +49,11 @@
       </div>
       <div>
         <label for="title" class="block text-sm font-medium mb-1">Title * (min 10 characters)</label>
-        <input id="title" class="w-full border rounded-lg px-3 py-2" required minlength="10" maxlength="120" placeholder="Short title of the problem" title="Title" />
+        <input id="title" class="w-full border rounded-lg px-3 py-2" required minlength="10" maxlength="120" placeholder="e.g. Broken street lights near the market" title="Title" />
       </div>
       <div>
         <label for="description" class="block text-sm font-medium mb-1">Description * (min 30 characters)</label>
-        <textarea id="description" rows="4" class="w-full border rounded-lg px-3 py-2" required minlength="30" placeholder="Explain the issue clearly..." title="Description"></textarea>
+        <textarea id="description" rows="4" class="w-full border rounded-lg px-3 py-2" required minlength="30" placeholder="Explain what is happening, where, and how it affects people..." title="Description"></textarea>
       </div>
       <div>
         <label for="photo" class="block text-sm font-medium mb-1">Photo (optional)</label>
@@ -61,42 +61,52 @@
         <p class="text-xs text-gray-500 mt-1">JPG, PNG or WebP. Prefer under 1.5MB.</p>
         <img id="photo-preview" class="hidden mt-3 max-h-40 rounded-lg border object-cover" alt="Preview" />
       </div>
-      <button type="submit" class="w-full bg-teal-700 text-white font-semibold py-2.5 rounded-lg hover:bg-teal-800">
-        Submit Issue
+      <button id="submit-btn" type="submit" class="w-full bg-teal-700 text-white font-semibold py-2.5 rounded-lg hover:bg-teal-800">
+        Submit issue
       </button>
       <p id="form-error" class="text-red-600 text-sm hidden"></p>
     </form>
 
-    <div id="success" class="hidden bg-white rounded-xl shadow-md p-8 text-center">
-      <div class="text-green-600 text-4xl mb-3"><i class="fas fa-check-circle"></i></div>
-      <h2 class="text-xl font-bold mb-2">Issue submitted</h2>
-      <p class="text-gray-600 mb-2">Your reference number is:</p>
-      <p id="ref-no" class="font-mono text-teal-700 text-lg font-bold mb-4"></p>
-      <a href="issues.html" class="text-teal-700 underline">Track issues</a>
+    <div id="success" class="hidden bg-white rounded-xl shadow-md p-8 text-center border border-green-100">
+      <div class="text-green-600 text-5xl mb-3"><i class="fas fa-check-circle"></i></div>
+      <h2 class="text-xl font-bold mb-2 text-gray-800">Issue submitted successfully</h2>
+      <p class="text-gray-600 mb-1">Keep this reference number to track progress:</p>
+      <p id="ref-no" class="font-mono text-teal-700 text-xl font-bold mb-3"></p>
+      <button type="button" onclick="copyRef()" class="bg-teal-50 text-teal-800 border border-teal-200 px-4 py-2 rounded-lg text-sm font-medium mb-6">
+        <i class="fas fa-copy mr-1"></i> Copy reference
+      </button>
+      <div class="flex flex-wrap justify-center gap-3 text-sm">
+        <a href="issues.html" class="bg-teal-700 text-white px-4 py-2 rounded-lg">Track issues</a>
+        <a href="my-issues.html" class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">My Issues</a>
+        <a href="index.html" class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">Home</a>
+      </div>
     </div>
   </main>
 
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
   <script>
-    let currentUser = null;
-    try {
-      currentUser = JSON.parse(sessionStorage.getItem('countyvoice_user') || 'null');
-    } catch (e) {}
+    let currentUser = CountyVoice.getUser();
+    let lastRef = '';
 
     function fileToDataURL(file) {
       return new Promise((resolve, reject) => {
         if (!file) return resolve(null);
-        if (!file.type.startsWith('image/')) {
-          return reject(new Error('Please choose an image file'));
-        }
-        if (file.size > 1.5 * 1024 * 1024) {
-          return reject(new Error('Photo must be under 1.5MB'));
-        }
+        if (!file.type.startsWith('image/')) return reject(new Error('Please choose an image file'));
+        if (file.size > 1.5 * 1024 * 1024) return reject(new Error('Photo must be under 1.5MB'));
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => reject(new Error('Could not read photo'));
         reader.readAsDataURL(file);
+      });
+    }
+
+    function copyRef() {
+      if (!lastRef) return;
+      navigator.clipboard.writeText(lastRef).then(() => {
+        CountyVoice.toast('Reference copied', 'success');
+      }).catch(() => {
+        CountyVoice.toast('Could not copy. Please copy manually.', 'error');
       });
     }
 
@@ -115,7 +125,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
       if (currentUser) {
         const b = document.getElementById('user-banner');
-        b.textContent = 'Logged in as ' + (currentUser.fullName || currentUser.username) + ' — name and ward will be filled for you.';
+        b.textContent = 'Logged in as ' + (currentUser.fullName || currentUser.username) + ' — name and ward can be filled for you.';
         b.classList.remove('hidden');
         document.getElementById('name').value = currentUser.fullName || currentUser.username || '';
       }
@@ -125,15 +135,13 @@
         const cSel = document.getElementById('category');
         wards.forEach(w => {
           const o = document.createElement('option');
-          o.value = w;
-          o.textContent = w;
+          o.value = w; o.textContent = w;
           if (currentUser && currentUser.location === w) o.selected = true;
           wSel.appendChild(o);
         });
         cats.forEach(c => {
           const o = document.createElement('option');
-          o.value = c;
-          o.textContent = c;
+          o.value = c; o.textContent = c;
           cSel.appendChild(o);
         });
       } catch (e) {
@@ -145,11 +153,12 @@
     document.getElementById('form').onsubmit = async (ev) => {
       ev.preventDefault();
       const err = document.getElementById('form-error');
+      const btn = document.getElementById('submit-btn');
       err.classList.add('hidden');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
       try {
-        const photoFile = document.getElementById('photo').files[0];
-        const photo = await fileToDataURL(photoFile);
-
+        const photo = await fileToDataURL(document.getElementById('photo').files[0]);
         const issue = await CountyVoice.saveIssue({
           name: document.getElementById('name').value.trim(),
           phone: document.getElementById('phone').value.trim(),
@@ -158,15 +167,20 @@
           title: document.getElementById('title').value.trim(),
           description: document.getElementById('description').value.trim(),
           userId: currentUser ? currentUser.id : null,
-          photo: photo
+          photo
         });
-
+        lastRef = issue.ref || issue._id;
         document.getElementById('form').classList.add('hidden');
         document.getElementById('success').classList.remove('hidden');
-        document.getElementById('ref-no').textContent = issue.ref || issue._id;
+        document.getElementById('ref-no').textContent = lastRef;
+        CountyVoice.toast('Issue submitted successfully', 'success');
       } catch (e) {
         err.textContent = e.message || 'Submission failed';
         err.classList.remove('hidden');
+        CountyVoice.toast(e.message || 'Submission failed', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit issue';
       }
     };
   </script>

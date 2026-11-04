@@ -21,49 +21,72 @@
 
   <main class="max-w-4xl mx-auto px-4 py-10">
     <h1 class="text-2xl font-bold mb-2">My Issues</h1>
-    <p class="text-gray-600 mb-6">Issues you submitted while logged in</p>
+    <p class="text-gray-600 mb-6">Track the issues you submitted and any official responses</p>
     <div id="msg" class="mb-4"></div>
-    <div id="list" class="space-y-4"></div>
+    <div id="list" class="space-y-4">
+      <p class="text-gray-500 text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</p>
+    </div>
   </main>
 
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
   <script>
-    const user = (() => {
-      try { return JSON.parse(sessionStorage.getItem('countyvoice_user') || 'null'); } catch (e) { return null; }
-    })();
+    const user = CountyVoice.getUser();
+
+    function timeline(history) {
+      if (!history || !history.length) return '';
+      return `
+        <div class="mt-4 border-l-2 border-teal-200 pl-4 space-y-3">
+          ${history.map(h => `
+            <div>
+              <p class="text-sm font-medium text-gray-800">${CountyVoice.escapeHtml(h.status)}</p>
+              <p class="text-xs text-gray-500">${CountyVoice.formatDate(h.date)}</p>
+              ${h.note ? `<p class="text-xs text-gray-600 mt-0.5">${CountyVoice.escapeHtml(h.note)}</p>` : ''}
+            </div>
+          `).join('')}
+        </div>`;
+    }
 
     if (!user || !user.id) {
-      document.getElementById('msg').innerHTML =
-        '<div class="bg-yellow-50 border border-yellow-200 text-yellow-900 rounded-lg p-4">Please <a class="underline font-semibold" href="user.html">log in</a> to view your issues.</div>';
+      document.getElementById('list').innerHTML = '';
+      document.getElementById('msg').innerHTML = `
+        <div class="bg-yellow-50 border border-yellow-200 text-yellow-900 rounded-xl p-6 text-center">
+          <p class="mb-3">Please log in to see issues linked to your account.</p>
+          <a href="user.html" class="inline-block bg-teal-700 text-white px-4 py-2 rounded-lg text-sm">Go to My Account</a>
+        </div>`;
     } else {
       CountyVoice.getIssues(user.id).then(issues => {
         const list = document.getElementById('list');
         if (!issues.length) {
-          list.innerHTML = '<p class="text-gray-500 text-center py-10">You have not submitted any issues yet.</p>';
+          list.innerHTML = `
+            <div class="bg-white border border-dashed rounded-xl p-10 text-center">
+              <p class="text-gray-600 mb-3">You have not submitted any issues yet.</p>
+              <a href="submit.html" class="inline-block bg-teal-700 text-white px-4 py-2 rounded-lg text-sm">Report your first issue</a>
+            </div>`;
           return;
         }
-        list.innerHTML = issues.map(i => `
-          <div class="bg-white border rounded-xl p-5">
-            <div class="flex justify-between mb-2">
+        list.innerHTML = issues.map(i => {
+          const fresh = CountyVoice.isRecentlyUpdated(i);
+          return `
+          <div class="bg-white border rounded-xl p-5 ${fresh ? 'border-teal-300 ring-1 ring-teal-100' : ''}">
+            <div class="flex flex-wrap justify-between gap-2 mb-2">
               <span class="font-mono text-sm text-teal-700 font-semibold">${CountyVoice.escapeHtml(i.ref || i._id)}</span>
-              <span class="text-xs font-medium">${CountyVoice.escapeHtml(i.status)}</span>
+              <div class="flex items-center gap-2">
+                ${fresh ? '<span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">New update</span>' : ''}
+                <span class="text-xs font-medium bg-gray-100 px-2 py-0.5 rounded-full">${CountyVoice.escapeHtml(i.status)}</span>
+              </div>
             </div>
             <h3 class="font-semibold">${CountyVoice.escapeHtml(i.title)}</h3>
             <p class="text-sm text-gray-600 mt-1">${CountyVoice.escapeHtml(i.description)}</p>
+            <p class="text-xs text-teal-700 mt-1">${CountyVoice.escapeHtml(CountyVoice.statusMeaning(i.status))}</p>
             ${i.photo ? `<img src="${i.photo}" alt="Issue photo" class="mt-3 max-h-48 rounded-lg border object-cover" />` : ''}
-            <p class="text-xs text-gray-500 mt-2">${CountyVoice.formatDate(i.createdAt)}</p>
-            ${i.adminNotes ? `<p class="text-sm mt-2 bg-teal-50 p-2 rounded"><strong>Official note:</strong> ${CountyVoice.escapeHtml(i.adminNotes)}</p>` : ''}
-            ${i.history && i.history.length ? `
-              <div class="mt-3 text-sm text-gray-600">
-                <strong>History</strong>
-                <ul class="mt-1 space-y-1">
-                  ${i.history.map(h => `<li>${CountyVoice.formatDate(h.date)} → ${CountyVoice.escapeHtml(h.status)}${h.note ? ' – ' + CountyVoice.escapeHtml(h.note) : ''}</li>`).join('')}
-                </ul>
-              </div>` : ''}
-          </div>
-        `).join('');
+            <p class="text-xs text-gray-500 mt-2">Submitted ${CountyVoice.timeAgo(i.createdAt)}</p>
+            ${i.adminNotes ? `<p class="text-sm mt-2 bg-teal-50 p-3 rounded-lg"><strong>Official response:</strong> ${CountyVoice.escapeHtml(i.adminNotes)}</p>` : ''}
+            ${timeline(i.history)}
+          </div>`;
+        }).join('');
       }).catch(e => {
+        document.getElementById('list').innerHTML = '';
         document.getElementById('msg').innerHTML = `<p class="text-red-600">${CountyVoice.escapeHtml(e.message)}</p>`;
       });
     }
